@@ -1,43 +1,109 @@
-/* Assignment 04: Finishing a Todo List App
- *
- * 
- *
- */
-
-
-//
 // Variables
-//
+let todoItems = [];
+let currentTodoID = 1;
 
-// Constants
-const appID = "app";
-const headingText = "To do. To done. ✅";
 
 // DOM Elements
-let appContainer = document.getElementById(appID);
+let listElement = document.getElementById("TodoList");
+let inputElement = document.getElementById("NewItemInput");
+let addButton = document.getElementById("AddButton");
+let clearButton = document.getElementById("ClearButton");
 
-//
+
 // Functions
-//
+function displayItems() {
+  listElement.innerHTML = "";
 
-// Add a heading to the app container
-function inititialise() {
-  // If anything is wrong with the app container then end
-  if (!appContainer) {
-    console.error("Error: Could not find app contianer");
-    return;
+
+  for (const item of todoItems) {
+    const listItem = document.createElement("li");
+    listItem.innerHTML =
+      `<h2>${item.task}</h2>
+      <span>${item.id}</span>
+      <button data-id="${item.id}" class="remove-btn">Remove</button>
+      <button data-id="${item.id}" class="complete-btn">Complete</button>`;
+
+
+    if (item.completed) {
+      const checkMark = document.createElement("span");
+      checkMark.innerHTML = "✅";
+      checkMark.classList.add("status-icon");
+      listItem.appendChild(checkMark);
+      listItem.classList.add("done");
+    }
+
+
+    listElement.appendChild(listItem);
   }
-
-  // Create an h1 and add it to our app
-  const h1 = document.createElement("h1");
-  h1.innerText = headingText;
-  appContainer.appendChild(h1);
-
-  // Init complete
-  console.log("App successfully initialised");
 }
 
-//
-// Inits & Event Listeners
-//
-inititialise();
+
+function handleAddItem() {
+  const taskDescription = inputElement.value.trim();
+
+
+  if (taskDescription !== "") {
+    createItem(taskDescription);
+    inputElement.value = "";
+    displayItems();
+  }
+}
+
+
+function handleItemClick(event) {
+  const itemID = parseInt(event.target.getAttribute("data-id"));
+
+
+  if (event.target.classList.contains("remove-btn")) {
+    removeItem(itemID);
+  } else if (event.target.classList.contains("complete-btn")) {
+    markItemAsCompleted(itemID);
+  }
+
+
+  displayItems();
+}
+
+
+function createItem(taskDescription) {
+  let item = {
+    id: currentTodoID,
+    task: taskDescription,
+    completed: false,
+  };
+
+
+  todoItems.push(item);
+  currentTodoID++;
+}
+
+
+function markItemAsCompleted(itemID) {
+  const itemIndex = todoItems.findIndex((item) => item.id === itemID);
+
+
+  if (itemIndex !== -1) {
+    todoItems[itemIndex].completed = true;
+  }
+}
+
+
+function removeItem(itemID) {
+  todoItems = todoItems.filter((item) => item.id !== itemID);
+}
+
+
+function clearAllItems() {
+  todoItems = [];
+  displayItems();
+}
+
+
+// Event Listeners
+addButton.addEventListener("click", handleAddItem);
+listElement.addEventListener("click", handleItemClick);
+clearButton.addEventListener("click", clearAllItems);
+
+
+// Initial rendering
+displayItems();
